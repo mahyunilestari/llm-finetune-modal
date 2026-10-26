@@ -1,0 +1,33 @@
+# Config used for 1x RTX PRO 6000 runs (96 GB VRAM).
+# Everything the trainer needs; nothing here is machine-specific.
+run_name: rtxpro6000-1x-finetune
+
+model:
+  name: Qwen/Qwen2.5-7B-Instruct
+  dtype: bfloat16
+  trust_remote_code: false
+
+lora:
+  r: 32
+  alpha: 64
+  dropout: 0.05
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+
+data:
+  train_file: data/train.jsonl        # {"text": "..."} per line, mounted at job start
+  val_file: data/val.jsonl
+  max_seq_len: 4096
+
+train:
+  batch_size: 4
+  grad_accum: 8
+  lr: 2.0e-4
+  scheduler: cosine
+  warmup_ratio: 0.03
+  max_steps: 4000
+  save_every: 15          # checkpoint cadence, steps
+  eval_every: 50          # validation pass cadence, steps
+
+output:
+  dir: /output            # Modal Volume `finetune-output`, persists between runs
+  keep_last: 8
